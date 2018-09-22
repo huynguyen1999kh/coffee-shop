@@ -517,3 +517,46 @@ select * from Account
 
 alter table dbo.Account  add foreign key (type) references dbo.Accounttype(id)
 
+select id from dbo.Accounttype where name = N'admin'
+update dbo.Account set userName = N'Huy', displayName = N'Nguyễn Huy',type = 2 where id = 2
+insert dbo.Account(UserName, DisplayName, type, Password) values(N'{0}', N'{1}',{2} , N'1')
+
+update dbo.Account set DisplayName = N'hh',type = 2 where UserName = 231
+
+alter proc USP_GetListBillByDayAndPage
+@checkIn date, @checkOut date, @page int, @pageColumn int
+as
+begin
+declare @prePage int
+select @prePage = @page - 1
+select top (@page * @pageColumn) t.name as [tên bàn], b.dateCheckIn as [ngày vào], b.dateCheckOut as [ngày ra], b.discount as [giảm giá], b.totalPrice as [tổng tiền] from 
+dbo.Bill as b,dbo.TableFood as t,dbo.BillInfo as bi, dbo.Food as f
+where b.idTable = t.id and b.status = 1
+and b.dateCheckIn >= @checkIn and b.dateCheckOut <= @checkOut
+and bi.idFood = f.id and bi.idBill = b.id
+except select top (@page * @pageColumn - 10) t.name as [tên bàn], b.dateCheckIn as [ngày vào], b.dateCheckOut as [ngày ra], b.discount as [giảm giá], b.totalPrice as [tổng tiền] from 
+dbo.Bill as b,dbo.TableFood as t,dbo.BillInfo as bi, dbo.Food as f
+where b.idTable = t.id and b.status = 1
+and b.dateCheckIn >= @checkIn and b.dateCheckOut <= @checkOut
+and bi.idFood = f.id and bi.idBill = b.id
+end
+go
+
+exec USP_GetListBillByDayAndPage getdate, getdate, 1 ,10
+
+select top 100 t.name as [tên bàn], b.dateCheckIn as [ngày vào], b.dateCheckOut as [ngày ra], b.discount as [giảm giá], b.totalPrice as [tổng tiền] from 
+dbo.Bill as b,dbo.TableFood as t,dbo.BillInfo as bi, dbo.Food as f
+where b.idTable = t.id and b.status = 1
+and bi.idFood = f.id and bi.idBill = b.id
+
+create proc USP_GetMaxBillByDate
+@checkIn date, @checkOut date
+as
+begin
+select count(*) from 
+dbo.Bill as b,dbo.TableFood as t,dbo.BillInfo as bi, dbo.Food as f
+where b.idTable = t.id and b.status = 1
+and b.dateCheckIn >= @checkIn and b.dateCheckOut <= @checkOut
+and bi.idFood = f.id and bi.idBill = b.id
+end
+go

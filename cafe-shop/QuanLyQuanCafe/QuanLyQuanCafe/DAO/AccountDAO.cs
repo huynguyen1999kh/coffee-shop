@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,7 +22,18 @@ namespace QuanLyQuanCafe.DAO
 
         public bool login(string userName, string Password)
         {
+            byte[] temp = ASCIIEncoding.ASCII.GetBytes(Password);
+            byte[] hasData = new MD5CryptoServiceProvider().ComputeHash(temp);
             string query = "exec dbo.USP_GetAccountByUserNameAndPassword @userName , @password ";
+
+            string hasPass = "";
+            foreach (byte item in hasData)
+            {
+                hasPass += item;
+            }
+
+            //var list = hasData.ToString();
+            //list.Reverse();
             /*
              * bug
              * if user enter password = 'or 1=1 --
@@ -30,7 +42,7 @@ namespace QuanLyQuanCafe.DAO
              */
             try
             {
-                int result = (int)DataProvider.Instance.ExcuteScarar(query, new object[] { userName, Password });
+                int result = (int)DataProvider.Instance.ExcuteScarar(query, new object[] { userName, hasPass });
                 return result > 0;
             }  catch
             {
@@ -64,6 +76,34 @@ namespace QuanLyQuanCafe.DAO
         public DataTable GetListAccountType()
         {
             return DataProvider.Instance.ExcuteQuery("select * from dbo.Accounttype");
+        }
+        public bool InsertAccount(string userName, string displayName, int type)
+        {
+            string query = string.Format("insert dbo.Account(UserName, DisplayName, type, Password) values(N'{0}', N'{1}',{2} , N'1962026656160185351301320480154111117132155')", userName, displayName, type);
+            int data = DataProvider.Instance.ExcuteNonQuery(query);
+            return data > 0;
+        }
+        public bool UpdateAccount(string userName, string displayName, int type)
+        {
+            string query = string.Format("update dbo.Account set DisplayName = N'{0}',type = {1} where UserName = N'{2}'", displayName, type, userName);
+            int data = DataProvider.Instance.ExcuteNonQuery(query);
+            return data > 0;
+        }
+        public int GetIDAccountTypeByName(string name)
+        {
+            string query = "select id from dbo.Accounttype where name = N'" + name +"'";
+            return (int) DataProvider.Instance.ExcuteScarar(query);
+        }
+        public bool DeleteAccount(string userName)
+        {
+            string query = string.Format("delete dbo.Account where UserName = N'"+userName+"'");
+            int data = DataProvider.Instance.ExcuteNonQuery(query);
+            return data > 0;
+        }
+        public bool SetdefaultPassword(string userName)
+        {
+            int data = DataProvider.Instance.ExcuteNonQuery("update dbo.Account set Password = N'1962026656160185351301320480154111117132155' where UserName = N'" + userName + "'");
+            return data > 0;
         }
     }
 }

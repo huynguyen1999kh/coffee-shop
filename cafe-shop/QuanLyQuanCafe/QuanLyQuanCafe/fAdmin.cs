@@ -24,7 +24,8 @@ namespace QuanLyQuanCafe
         #region methods
         void LoadListBillByDate(DateTime checkIn, DateTime checkOut)
         {
-            this.dataGridViewViewBill.DataSource = BillDAO.Instance.GetListBillByDate(checkIn, checkOut);
+            int page = (int) this.numericUpDown1.Value;
+            this.dataGridViewViewBill.DataSource = BillDAO.Instance.GetListBillByDateAndPage(checkIn, checkOut,page);
         }
         void SetDefault()
         {
@@ -32,6 +33,7 @@ namespace QuanLyQuanCafe
             dateTimePickerFromDate.Value = new DateTime(today.Year, today.Month, 1);
             dateTimePickerToDate.Value = dateTimePickerFromDate.Value.AddMonths(1).AddDays(-1);
             LoadListBillByDate(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
+            SetMaxBillPage(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
 
             this.dataGridViewFood.DataSource = FoodDAO.Instance.GetListFood();
             this.comboBoxFoodCatetory.DataSource = CatetoryDAO.Instance.GetListCatetory();
@@ -65,6 +67,16 @@ namespace QuanLyQuanCafe
             comboBoxAccountType.DataBindings.Add(new Binding("Text", this.dataGridViewAccount.DataSource, "loại tài khoản", true, DataSourceUpdateMode.Never));
         }
 
+        void SetMaxBillPage(DateTime checkIn, DateTime checkOut)
+        {
+            int Bills = BillDAO.Instance.GetMaxBillByDate(checkIn, checkOut);
+            int result = Bills / 10;
+            if (result % 10 != 0)
+                result++;
+            if (result == 0)
+                result = 1;
+            this.numericUpDown1.Maximum = result;
+        }
         #endregion
 
         #region events
@@ -72,6 +84,7 @@ namespace QuanLyQuanCafe
         private void buttonViewBill_Click(object sender, EventArgs e)
         {
             LoadListBillByDate(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
+            SetMaxBillPage(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
         }
         private void buttonViewFood_Click(object sender, EventArgs e)
         {
@@ -167,5 +180,127 @@ namespace QuanLyQuanCafe
             addFoodBiding();
         }
 
+        private void buttonViewAccount_Click(object sender, EventArgs e)
+        {
+            this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
+            addAccountBiding();
+        }
+
+        private void buttonAddAccount_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (this.textBoxDisplayName.Text != "" && this.textBoxUserName.Text != "")
+                {
+                    bool result = AccountDAO.Instance.InsertAccount(this.textBoxUserName.Text, this.textBoxDisplayName.Text, AccountDAO.Instance.GetIDAccountTypeByName(this.comboBoxAccountType.Text));
+                    if (result)
+                        MessageBox.Show("thêm tài khoản thành công, mật khẩu mặc định là 1");
+                    else
+                        MessageBox.Show("đã xảy ra lỗi, thêm không thành công");
+                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
+                    addAccountBiding();
+                }
+                else
+                    MessageBox.Show("bạn chưa điền vào ô");
+            }
+            catch
+            {
+                MessageBox.Show("tên tài khoản không được phép trùng");
+            }
+        }
+
+        private void buttonEditAccount_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (MessageBox.Show("bạn muốn sửa thông tin tài khoản?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
+                {
+                    bool result = AccountDAO.Instance.UpdateAccount(this.textBoxUserName.Text,this.textBoxDisplayName.Text, AccountDAO.Instance.GetIDAccountTypeByName(this.comboBoxAccountType.Text));
+                    if (result)
+                        MessageBox.Show("sửa tài khoản thành công");
+                    else
+                        MessageBox.Show("bạn không được thay đổi tên tài khoản");
+                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
+                    addAccountBiding();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("tên tài khoản không được phép trùng");
+            }
+        }
+
+        private void buttonDeleteAccount_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (MessageBox.Show("bạn muốn xóa tài khoản này?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
+                {
+                    bool result = AccountDAO.Instance.DeleteAccount(this.textBoxUserName.Text);
+                    if (result)
+                        MessageBox.Show("xóa tài khoản thành công");
+                    else
+                        MessageBox.Show("sai tên tài khoản");
+                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
+                    addAccountBiding();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("đã xảy ra lỗi");
+            }
+        }
+
+        private void buttonResetPassword_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (MessageBox.Show("đặt lại mật khẩu mặc định cho tài khoản này", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
+                {
+                    bool result = AccountDAO.Instance.SetdefaultPassword(this.textBoxUserName.Text);
+                    if (result)
+                        MessageBox.Show("mật khẩu mặc định là 1");
+                    else
+                        MessageBox.Show("sai tên tài khoản");
+                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
+                    addAccountBiding();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("đã xảy ra lỗi");
+            }
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            LoadListBillByDate(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
+        }
+
+        private void buttonFirst_Click(object sender, EventArgs e)
+        {
+            this.numericUpDown1.Value = 1;
+        }
+
+        private void buttonPre_Click(object sender, EventArgs e)
+        {
+            if (this.numericUpDown1.Value != 1)
+            {
+                this.numericUpDown1.Value -= 1;
+            }
+        }
+
+        private void buttonLast_Click(object sender, EventArgs e)
+        {
+            this.numericUpDown1.Value = this.numericUpDown1.Maximum;
+        }
+
+        private void buttonNext_Click(object sender, EventArgs e)
+        {
+            if (this.numericUpDown1.Value != this.numericUpDown1.Maximum)
+            {
+                this.numericUpDown1.Value += 1;
+            }
+        }
     }
 }
