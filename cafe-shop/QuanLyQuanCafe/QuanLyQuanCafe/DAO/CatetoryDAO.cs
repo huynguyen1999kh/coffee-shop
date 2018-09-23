@@ -33,10 +33,35 @@ namespace QuanLyQuanCafe.DAO
             return list;
         }
 
+        public DataTable GetCatetory()
+        {
+            string query = "select id as [ID], name as [danh mục thức ăn] from dbo.FoodCatetory";
+            return DataProvider.Instance.ExcuteQuery(query);
+        }
+
         public int GetIDCatetoryByName(string name)
         {
             int id = (int) DataProvider.Instance.ExcuteScarar("select id from dbo.FoodCatetory where name = N'" + name + "'");
             return id;
+        }
+
+        public bool InsertCatetory(Catetory cate)
+        {
+            string query = string.Format("insert dbo.FoodCatetory(name) values (N'{0}')", cate.Name);
+            int result = DataProvider.Instance.ExcuteNonQuery(query);
+            return result > 0;
+        }
+        public bool UpdateCatetory(Catetory cate)
+        {
+            string query = string.Format("update dbo.FoodCatetory set name = N'{0}' where id = {1}", cate.Name,cate.ID);
+            int result = DataProvider.Instance.ExcuteNonQuery(query);
+            return result > 0;
+        }
+        public bool DeleteCatetory(int id)
+        {
+            string query = string.Format("delete dbo.FoodCatetory where id = {0}", id);
+            int result = DataProvider.Instance.ExcuteNonQuery(query);
+            return result > 0;
         }
     }
 }

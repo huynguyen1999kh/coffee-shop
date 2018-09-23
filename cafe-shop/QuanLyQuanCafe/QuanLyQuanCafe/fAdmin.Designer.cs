@@ -628,6 +628,7 @@
             // 
             // dataGridViewFoodCatetory
             // 
+            this.dataGridViewFoodCatetory.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridViewFoodCatetory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewFoodCatetory.Location = new System.Drawing.Point(4, 4);
             this.dataGridViewFoodCatetory.Name = "dataGridViewFoodCatetory";
@@ -663,6 +664,7 @@
             this.buttonEditFoodCatetory.TabIndex = 2;
             this.buttonEditFoodCatetory.Text = "Sửa";
             this.buttonEditFoodCatetory.UseVisualStyleBackColor = true;
+            this.buttonEditFoodCatetory.Click += new System.EventHandler(this.buttonEditFoodCatetory_Click);
             // 
             // buttonDeleteFoodCatetory
             // 
@@ -672,6 +674,7 @@
             this.buttonDeleteFoodCatetory.TabIndex = 1;
             this.buttonDeleteFoodCatetory.Text = "Xóa";
             this.buttonDeleteFoodCatetory.UseVisualStyleBackColor = true;
+            this.buttonDeleteFoodCatetory.Click += new System.EventHandler(this.buttonDeleteFoodCatetory_Click);
             // 
             // buttonAddFoodCatetory
             // 
@@ -681,6 +684,7 @@
             this.buttonAddFoodCatetory.TabIndex = 0;
             this.buttonAddFoodCatetory.Text = "Thêm";
             this.buttonAddFoodCatetory.UseVisualStyleBackColor = true;
+            this.buttonAddFoodCatetory.Click += new System.EventHandler(this.buttonAddFoodCatetory_Click);
             // 
             // tabPageTable
             // 
@@ -705,6 +709,7 @@
             // 
             // dataGridViewTable
             // 
+            this.dataGridViewTable.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridViewTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewTable.Location = new System.Drawing.Point(4, 4);
             this.dataGridViewTable.Name = "dataGridViewTable";
@@ -740,6 +745,7 @@
             this.buttonEditTable.TabIndex = 2;
             this.buttonEditTable.Text = "Sửa";
             this.buttonEditTable.UseVisualStyleBackColor = true;
+            this.buttonEditTable.Click += new System.EventHandler(this.buttonEditTable_Click);
             // 
             // buttonDeleteTable
             // 
@@ -749,6 +755,7 @@
             this.buttonDeleteTable.TabIndex = 1;
             this.buttonDeleteTable.Text = "Xóa";
             this.buttonDeleteTable.UseVisualStyleBackColor = true;
+            this.buttonDeleteTable.Click += new System.EventHandler(this.buttonDeleteTable_Click);
             // 
             // buttonAddTable
             // 
@@ -758,6 +765,7 @@
             this.buttonAddTable.TabIndex = 0;
             this.buttonAddTable.Text = "Thêm";
             this.buttonAddTable.UseVisualStyleBackColor = true;
+            this.buttonAddTable.Click += new System.EventHandler(this.buttonAddTable_Click);
             // 
             // panel13
             // 
