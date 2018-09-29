@@ -24,8 +24,7 @@ namespace QuanLyQuanCafe
         #region methods
         void LoadListBillByDate(DateTime checkIn, DateTime checkOut)
         {
-            int page = (int) this.numericUpDown1.Value;
-            this.dataGridViewViewBill.DataSource = BillDAO.Instance.GetListBillByDateAndPage(checkIn, checkOut,page);
+            this.dataGridViewViewBill.DataSource = BillDAO.Instance.GetListBillByDate(checkIn, checkOut);
         }
         void SetDefault()
         {
@@ -33,7 +32,6 @@ namespace QuanLyQuanCafe
             dateTimePickerFromDate.Value = new DateTime(today.Year, today.Month, 1);
             dateTimePickerToDate.Value = dateTimePickerFromDate.Value.AddMonths(1).AddDays(-1);
             LoadListBillByDate(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
-            SetMaxBillPage(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
 
             this.dataGridViewFood.DataSource = FoodDAO.Instance.GetListFood();
             this.comboBoxFoodCatetory.DataSource = CatetoryDAO.Instance.GetListCatetory();
@@ -44,14 +42,6 @@ namespace QuanLyQuanCafe
             this.comboBoxAccountType.DataSource = AccountDAO.Instance.GetListAccountType();
             this.comboBoxAccountType.DisplayMember = "name";
             addAccountBiding();
-
-            this.dataGridViewFoodCatetory.DataSource = CatetoryDAO.Instance.GetCatetory();
-            addCatetoryBiding();
-
-            this.dataGridViewTable.DataSource = TableDAO.Instance.GetTable();
-            this.comboBoxTableStatus.DataSource = TableDAO.Instance.LoadTableList();
-            this.comboBoxTableStatus.DisplayMember = "status";
-            addTableBiding();
         }
         void addFoodBiding()
         {
@@ -74,33 +64,7 @@ namespace QuanLyQuanCafe
             textBoxDisplayName.DataBindings.Add(new Binding("Text", this.dataGridViewAccount.DataSource, "tên hiển thị", true, DataSourceUpdateMode.Never));
             comboBoxAccountType.DataBindings.Add(new Binding("Text", this.dataGridViewAccount.DataSource, "loại tài khoản", true, DataSourceUpdateMode.Never));
         }
-        void addCatetoryBiding()
-        {
-            textBoxFoodCatetoryID.DataBindings.Clear();
-            textBoxFoodCatetoryName.DataBindings.Clear();
-            textBoxFoodCatetoryID.DataBindings.Add(new Binding("Text", this.dataGridViewFoodCatetory.DataSource, "ID", true, DataSourceUpdateMode.Never));
-            textBoxFoodCatetoryName.DataBindings.Add(new Binding("Text", this.dataGridViewFoodCatetory.DataSource, "danh mục thức ăn", true, DataSourceUpdateMode.Never));
-        }
-        void addTableBiding()
-        {
-            textBoxTableID.DataBindings.Clear();
-            textBoxTableName.DataBindings.Clear();
-            comboBoxTableStatus.DataBindings.Clear();
-            textBoxTableID.DataBindings.Add(new Binding("Text", this.dataGridViewTable.DataSource, "ID", true, DataSourceUpdateMode.Never));
-            textBoxTableName.DataBindings.Add(new Binding("Text", this.dataGridViewTable.DataSource, "tên bàn", true, DataSourceUpdateMode.Never));
-            comboBoxTableStatus.DataBindings.Add(new Binding("Text", this.dataGridViewTable.DataSource, "trạng thái", true, DataSourceUpdateMode.Never));
-        }
 
-        void SetMaxBillPage(DateTime checkIn, DateTime checkOut)
-        {
-            int Bills = BillDAO.Instance.GetMaxBillByDate(checkIn, checkOut);
-            int result = Bills / 10;
-            if (result % 10 != 0)
-                result++;
-            if (result == 0)
-                result = 1;
-            this.numericUpDown1.Maximum = result;
-        }
         #endregion
 
         #region events
@@ -108,7 +72,6 @@ namespace QuanLyQuanCafe
         private void buttonViewBill_Click(object sender, EventArgs e)
         {
             LoadListBillByDate(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
-            SetMaxBillPage(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
         }
         private void buttonViewFood_Click(object sender, EventArgs e)
         {
@@ -204,258 +167,5 @@ namespace QuanLyQuanCafe
             addFoodBiding();
         }
 
-        private void buttonViewAccount_Click(object sender, EventArgs e)
-        {
-            this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
-            addAccountBiding();
-        }
-
-        private void buttonAddAccount_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (this.textBoxDisplayName.Text != "" && this.textBoxUserName.Text != "")
-                {
-                    bool result = AccountDAO.Instance.InsertAccount(this.textBoxUserName.Text, this.textBoxDisplayName.Text, AccountDAO.Instance.GetIDAccountTypeByName(this.comboBoxAccountType.Text));
-                    if (result)
-                        MessageBox.Show("thêm tài khoản thành công, mật khẩu mặc định là 1");
-                    else
-                        MessageBox.Show("đã xảy ra lỗi, thêm không thành công");
-                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
-                    addAccountBiding();
-                }
-                else
-                    MessageBox.Show("bạn chưa điền vào ô");
-            }
-            catch
-            {
-                MessageBox.Show("tên tài khoản không được phép trùng");
-            }
-        }
-
-        private void buttonEditAccount_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("bạn muốn sửa thông tin tài khoản?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    bool result = AccountDAO.Instance.UpdateAccount(this.textBoxUserName.Text,this.textBoxDisplayName.Text, AccountDAO.Instance.GetIDAccountTypeByName(this.comboBoxAccountType.Text));
-                    if (result)
-                        MessageBox.Show("sửa tài khoản thành công");
-                    else
-                        MessageBox.Show("bạn không được thay đổi tên tài khoản");
-                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
-                    addAccountBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("tên tài khoản không được phép trùng");
-            }
-        }
-
-        private void buttonDeleteAccount_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("bạn muốn xóa tài khoản này?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    bool result = AccountDAO.Instance.DeleteAccount(this.textBoxUserName.Text);
-                    if (result)
-                        MessageBox.Show("xóa tài khoản thành công");
-                    else
-                        MessageBox.Show("sai tên tài khoản");
-                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
-                    addAccountBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
-
-        private void buttonResetPassword_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("đặt lại mật khẩu mặc định cho tài khoản này", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    bool result = AccountDAO.Instance.SetdefaultPassword(this.textBoxUserName.Text);
-                    if (result)
-                        MessageBox.Show("mật khẩu mặc định là 1");
-                    else
-                        MessageBox.Show("sai tên tài khoản");
-                    this.dataGridViewAccount.DataSource = AccountDAO.Instance.GetListAccount();
-                    addAccountBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
-
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
-        {
-            LoadListBillByDate(this.dateTimePickerFromDate.Value, this.dateTimePickerToDate.Value);
-        }
-
-        private void buttonFirst_Click(object sender, EventArgs e)
-        {
-            this.numericUpDown1.Value = 1;
-        }
-
-        private void buttonPre_Click(object sender, EventArgs e)
-        {
-            if (this.numericUpDown1.Value != 1)
-            {
-                this.numericUpDown1.Value -= 1;
-            }
-        }
-
-        private void buttonLast_Click(object sender, EventArgs e)
-        {
-            this.numericUpDown1.Value = this.numericUpDown1.Maximum;
-        }
-
-        private void buttonNext_Click(object sender, EventArgs e)
-        {
-            if (this.numericUpDown1.Value != this.numericUpDown1.Maximum)
-            {
-                this.numericUpDown1.Value += 1;
-            }
-        }
-
-        private void buttonAddFoodCatetory_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("bạn muốn thêm vào danh mục thức ăn?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    Catetory cate = new Catetory(int.Parse(this.textBoxFoodCatetoryID.Text), this.textBoxFoodCatetoryName.Text);
-                    bool result = CatetoryDAO.Instance.InsertCatetory(cate);
-                    if (result)
-                        MessageBox.Show("thêm thành công");
-                    else
-                        MessageBox.Show("thêm không thành công");
-                    this.dataGridViewFoodCatetory.DataSource = CatetoryDAO.Instance.GetCatetory();
-                    addCatetoryBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
-
-        private void buttonEditFoodCatetory_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("bạn muốn sửa tên danh mục thức ăn?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    Catetory cate = new Catetory(int.Parse(this.textBoxFoodCatetoryID.Text), this.textBoxFoodCatetoryName.Text);
-                    bool result = CatetoryDAO.Instance.UpdateCatetory(cate);
-                    if (result)
-                        MessageBox.Show("sửa thành công");
-                    else
-                        MessageBox.Show("sửa không thành công");
-                    this.dataGridViewFoodCatetory.DataSource = CatetoryDAO.Instance.GetCatetory();
-                    addCatetoryBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
-
-        private void buttonDeleteFoodCatetory_Click(object sender, EventArgs e)
-        {
-
-            try
-            {
-                if (MessageBox.Show("bạn muốn xóa tên danh mục thức ăn?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    bool result = CatetoryDAO.Instance.DeleteCatetory(int.Parse(this.textBoxFoodCatetoryID.Text));
-                    if (result)
-                        MessageBox.Show("xóa thành công");
-                    else
-                        MessageBox.Show("xóa không thành công");
-                    this.dataGridViewFoodCatetory.DataSource = CatetoryDAO.Instance.GetCatetory();
-                    addCatetoryBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
-
-        private void buttonAddTable_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("bạn muốn thêm bàn?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    Table table = new Table(int.Parse(this.textBoxTableID.Text), this.textBoxTableName.Text,this.comboBoxTableStatus.Text);
-                    bool result = TableDAO.Instance.InsertTable(table);
-                    if (result)
-                        MessageBox.Show("thêm thành công");
-                    else
-                        MessageBox.Show("thêm không thành công");
-                    this.dataGridViewTable.DataSource = TableDAO.Instance.GetTable();
-                    addTableBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
-
-        private void buttonDeleteTable_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("bạn muốn xóa " + this.textBoxTableName.Text + " ?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    bool result = TableDAO.Instance.DeleteTable(int.Parse(this.textBoxTableID.Text));
-                    if (result)
-                        MessageBox.Show("xóa thành công");
-                    else
-                        MessageBox.Show("xóa không thành công");
-                    this.dataGridViewTable.DataSource = TableDAO.Instance.GetTable();
-                    addTableBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
-
-        private void buttonEditTable_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (MessageBox.Show("bạn muốn sửa " + this.textBoxTableName.Text + " ?", "xác nhận", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
-                {
-                    Table table = new Table(int.Parse(this.textBoxTableID.Text), this.textBoxTableName.Text, this.comboBoxTableStatus.Text);
-                    bool result = TableDAO.Instance.UpdateTable(table);
-                    if (result)
-                        MessageBox.Show("sửa thành công");
-                    else
-                        MessageBox.Show("sửa không thành công");
-                    this.dataGridViewTable.DataSource = TableDAO.Instance.GetTable();
-                    addTableBiding();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("đã xảy ra lỗi");
-            }
-        }
     }
 }
